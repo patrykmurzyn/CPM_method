@@ -121,6 +121,8 @@ class CpmCalculationService:
 
         plt.savefig("test")
 
+        plt.clf()
+
         start_times = []
         end_times = []
         wyniki.append('ES: '+str(ES[1]))
@@ -144,6 +146,7 @@ class CpmCalculationService:
         ax.set_xlabel('Czas')
 
         plt.savefig('wykres.png')
-        
 
+        plt.clf()
+        
         return wyniki
