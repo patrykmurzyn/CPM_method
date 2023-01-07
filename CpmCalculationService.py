@@ -49,14 +49,14 @@ class CpmCalculationService:
 
         wyniki.append("Successors:")
         for i in successors:
-            wyniki.append(i)
+            wyniki.append(i[0] + 1, ': ', i[1])
 
         wyniki.append("-----------ES-----------")
-        for i in ES:
-            wyniki.append(i)
+        for i in enumerate(ES):
+            wyniki.append(i[0] + 1, ': ', i[1])
 
         wyniki.append("-----------EF-----------")
-        for i in EF:
+        for i in enumerate(EF):
             wyniki.append(i)
 
 
@@ -85,12 +85,12 @@ class CpmCalculationService:
         LF.reverse()
 
         wyniki.append("-----------LS-----------")
-        for i in LS:
-            wyniki.append(i)
+        for i in enumerate(LS):
+            wyniki.append(i[0] + 1, ': ', i[1])
 
         wyniki.append("-----------LF-----------")
-        for i in LF:
-            wyniki.append(i)
+        for i in enumerate(LF):
+            wyniki.append(i[0] + 1, ': ', i[1])
 
         for i in range(len(activities)):
             SK.append(LS[i] - ES[i])
