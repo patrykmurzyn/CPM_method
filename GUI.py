@@ -19,7 +19,7 @@ class App(QWidget):
 
         self.setWindowTitle(self.title)
         self.setGeometry(self.left, self.top, self.width, self.height)
-        self.layout = QVBoxLayout()
+        self.layout = QGridLayout()
         self.tableWidget = QTableWidget()
 
         self.cpm_calculation = CpmCalculationService()
@@ -46,9 +46,24 @@ class App(QWidget):
 
         )
         again_button.clicked.connect(self.frame0)
-        self.layout.addWidget(label1)
-        self.layout.addWidget(text_edit1)
-        self.layout.addWidget(again_button)
+        pixmap = QPixmap('test.png')
+        
+        pixmap = pixmap.scaledToWidth(400)
+        labelImg = QLabel()
+        
+        labelImg.setPixmap(pixmap)
+        
+
+        pixmap2 = QPixmap('wykres.png')
+        pixmap2 = pixmap2.scaledToWidth(300)
+        labelGanttImg = QLabel()
+        labelGanttImg.setPixmap(pixmap2)
+        
+        self.layout.addWidget(labelImg,1,0)
+        self.layout.addWidget(text_edit1,1,1,2,1)
+        self.layout.addWidget(labelGanttImg,2,0)
+        self.layout.addWidget(again_button,3,0,3,2)
+
         self.setLayout(self.layout)
 
     def frame0(self):
@@ -66,7 +81,8 @@ class App(QWidget):
                 filepath = QFileDialog.getOpenFileName(None, 'Wybierz pliki do wgrania')
                 filepath = str(filepath)
                 print(str(datetime.now()) + " [INFO] " + "Wybrano plik: " + filepath)
-                y = filepath.replace("('C:", '')
+                z = filepath.replace("('C:", '')
+                y = z.replace("('",'')
                 filepath = y.replace("', 'All Files (*)')", '')
                 label_select.setText(filepath)
                 activities, durations, predecessors = self.csvToTable(filepath)
@@ -111,13 +127,13 @@ class App(QWidget):
 
         button_select.clicked.connect(select_file)
 
-        self.layout.addWidget(label_top)
-        self.layout.addWidget(self.tableWidget)
-        self.layout.addWidget(button_select)
-        self.layout.addWidget(label_select)
+        self.layout.addWidget(label_top,1,0)
+        self.layout.addWidget(self.tableWidget,2,0)
+        self.layout.addWidget(button_select,3,0)
+        self.layout.addWidget(label_select,4,0)
 
-        self.layout.addWidget(save_button)
-        self.layout.addWidget(label_bottom)
+        self.layout.addWidget(save_button,5,0)
+        self.layout.addWidget(label_bottom,6,0)
 
         self.setLayout(self.layout)
 

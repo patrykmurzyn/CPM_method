@@ -9,137 +9,141 @@ BIG_INT = 1000000000000
 
 class CpmCalculationService:
 
-    def __init__(self):
-        self.successors = []
-        self.G = None
 
     def calculate(self, activities, durations, predecessors):
 
-        self.validate_input(activities, durations, predecessors)
-
-        self.successors = []
-        self.G = nx.DiGraph()
+        successors = []
+        G = None
         wyniki = []
+        ES = [] #Early Start
+        EF = [] #Early Finish
+        LS = [] #Late Start
+        LF = [] #Late Finish
+        SK = [] #Slack Value
+
+        G = nx.DiGraph()
 
         for i in range(len(activities)):
-            self.successors.append('')
-
-        wyniki, es, ef = self.calculate_and_add_edges(predecessors, activities, durations, wyniki)
-
-        self.generate_graph()
-
-        wyniki, ls = self.calculate_and_add_late(ef, durations, activities, wyniki)
-
-        wyniki = self.calculate_and_add_slack(ls, es, activities, wyniki)
-
-        return wyniki
-
-    def calculate_and_add_edges(self, predecessors, activities, durations, wyniki):
-        es = []
-        ef = []
+            successors.append('')
 
         wyniki.append("Edges:")
         for i in range(len(activities)):
 
-            if i == 0:
-                es.append(0)
-                ef.append(durations[0])
+            if(i == 0):
+                ES.append(0)
+                EF.append(durations[0])
 
             else:
-                local_max = 0
+                max = 0
 
                 for j in range(len(predecessors[i])):
-                    self.G.add_edge(predecessors[i][j], activities[i])
-                    wyniki.append(predecessors[i][j] + "->" + activities[i])
-                    self.successors[activities.index(predecessors[i][j])] += activities[i]
+                    G.add_edge(predecessors[i][j], activities[i])
+                    wyniki.append(predecessors[i][j] +  "->" + activities[i])
+                    successors[activities.index(predecessors[i][j])] += activities[i];
 
-                    if ef[activities.index(predecessors[i][j])] > local_max:
-                        local_max = ef[activities.index(predecessors[i][j])]
+                    if(EF[activities.index(predecessors[i][j])] > max):
+                        max = EF[activities.index(predecessors[i][j])]
 
-                es.append(local_max)
-                ef.append(local_max + durations[i])
+                ES.append(max)
+                EF.append(max + durations[i])
 
-        wyniki.append("self.successors:")
-        for i in self.successors:
+        wyniki.append("Successors:")
+        for i in successors:
             wyniki.append(i)
 
         wyniki.append("-----------ES-----------")
-        for i in es:
+        for i in ES:
             wyniki.append(i)
 
         wyniki.append("-----------EF-----------")
-        for i in ef:
+        for i in EF:
             wyniki.append(i)
 
-        return wyniki, es, ef
 
-    def calculate_and_add_late(self, ef, durations, activities, wyniki):
-        lf = []
-        ls = []
-
-        size = len(activities)
+        size = len(activities) 
 
         wyniki.append("Start")
         for i in range(len(activities)):
-            if i == 0:
-                lf.append(ef[size - 1])
-                ls.append(lf[0] - durations[size - 1])
+            if(i == 0):
+                LF.append(EF[size - 1])
+                LS.append(LF[0] - durations[size - 1])
 
             else:
-                min_duration = BIG_INT
+                min = 1000000000000
 
-                for j in range(len(self.successors[size - i - 1])):
+                for j in range(len(successors[size - i - 1])):
 
-                    if ls[size - 1 - activities.index(self.successors[size - i - 1][j])] < min_duration:
+                    if(LS[size - 1 - activities.index(successors[size - i - 1][j])] < min):
                         wyniki.append("IN")
-                        min_duration = ls[size - 1 - activities.index(self.successors[size - i - 1][j])]
+                        min = LS[size - 1 - activities.index(successors[size - i - 1][j])]
 
-                lf.append(min_duration)
-                ls.append(min_duration - durations[size - i - 1])
+                LF.append(min)
+                LS.append(min - durations[size - i - 1])
 
-        ls.reverse()
-        lf.reverse()
+
+        LS.reverse()
+        LF.reverse()
 
         wyniki.append("-----------LS-----------")
-        for i in ls:
+        for i in LS:
             wyniki.append(i)
 
         wyniki.append("-----------LF-----------")
-        for i in lf:
+        for i in LF:
             wyniki.append(i)
-
-        return wyniki, ls
-
-    def calculate_and_add_slack(self, ls, es, activities, wyniki):
-        sk = []
 
         for i in range(len(activities)):
-            sk.append(ls[i] - es[i])
+            SK.append(LS[i] - ES[i])
+
 
         wyniki.append("-----------SK-----------")
-        for i in sk:
-            wyniki.append(i)
+        for i in SK:
+            wyniki.append(i)        
+
+        color_map = []
+        for node in G:
+            wyniki.append(activities.index(node))
+            if(SK[activities.index(node)]) == 0:
+                color_map.append('red')
+            else:
+                color_map.append('green')
+
+
+        pos = nx.spring_layout(G, seed=12)
+        for k,v in pos.items():
+            pos[k]=(-v[1],v[0])
+
+        nx.draw_networkx_nodes(G,pos = pos, node_shape = 'o', node_size = 300, 
+                                node_color = color_map, edgecolors='k')
+        nx.draw_networkx_edges(G,pos = pos, 
+                                node_shape = 's', width = 1,  node_size = 200)
+        nx.draw_networkx_labels(G,pos = pos, font_size = 12)
+
+        plt.savefig("test")
+
+        start_times = []
+        end_times = []
+        wyniki.append('ES: '+str(ES[1]))
+        for i in range(len(activities)):
+            wyniki.append('i: '+str(i))
+
+            start_times.append(ES[i])
+
+            end_times.append(EF[i])
+
+        # Stwórz pusty wykres
+        fig, ax = plt.subplots()
+
+        # Iteruj przez wszystkie zadania i rysuj na wykresie odpowiednie prostokąty
+        for i, task in enumerate(reversed(activities)):
+            ax.barh(i, end_times[len(activities) - i -1] - start_times[len(activities) - i -1], left=start_times[len(activities) - i -1], height=0.5, label=task)
+
+        # Dodaj opisy osi i etykiety zadań
+        ax.set_yticks(range(len(activities)))
+        ax.set_yticklabels(reversed(activities))
+        ax.set_xlabel('Czas')
+
+        plt.savefig('wykres.png')
+        
 
         return wyniki
-
-    def validate_input(self, activities, durations, predecessors):
-        if len(activities) == len(durations) and len(durations) == len(predecessors):
-            pass
-        else:
-            raise ValueError("Number of elements in arrays differ")
-
-    def generate_file_name(self, prefix):
-        return prefix + ''.join(random.choices(string.ascii_lowercase + string.digits, k=4))
-
-    def generate_graph(self):
-        pos = nx.spring_layout(self.G, seed=12)
-        for k, v in pos.items():
-            pos[k] = (-v[1], v[0])
-
-        nx.draw_networkx_nodes(self.G, pos=pos, node_shape='o', node_size=300,
-                               node_color='none', edgecolors='k')
-        nx.draw_networkx_edges(self.G, pos=pos,
-                               node_shape='s', width=1, node_size=200)
-        nx.draw_networkx_labels(self.G, pos=pos, font_size=11)
-
-        plt.savefig(self.generate_file_name("resources/test_"))
